@@ -1,3 +1,5 @@
+from datetime import datetime
+
 menu = """
 
 [d] Depositar
@@ -9,9 +11,22 @@ menu = """
 
 saldo = 0
 limite = 500
-extrato = ""
+dict_tempo_operacao = {}
 numero_saques = 0
 LIMITE_SAQUES = 3
+
+
+def adiciona_operacao_com_tempo(dict, operacao):
+    """Adiciona uma operacao ao dict, usando como chave o tempo atual"""
+    tempo_agora = datetime.now()
+    if dict.__contains__(tempo_agora):
+        dict[tempo_agora].append(operacao)
+    else:
+        dict[tempo_agora] = [operacao]
+
+def exibir_extrato(dict):
+    for tempo, operacao in dict.items():
+        print(f"{tempo:%d-%m-%Y %H:%M:%S} - {operacao}")
 
 while True:
 
@@ -23,7 +38,7 @@ while True:
 
             if valor > 0:
                 saldo += valor
-                extrato += f"Depósito: R$ {valor:.2f}\n"
+                adiciona_operacao_com_tempo(dict_tempo_operacao, f"Depósito: R$ {valor:.2f}")
 
             else:
                 print("Operação falhou! O valor informado é inválido.")
@@ -47,7 +62,7 @@ while True:
 
             elif valor > 0:
                 saldo -= valor
-                extrato += f"Saque: R$ {valor:.2f}\n"
+                adiciona_operacao_com_tempo(dict_tempo_operacao, f"Saque: R$ {valor:.2f}")
                 numero_saques += 1
 
             else:
@@ -55,7 +70,7 @@ while True:
 
         case "e" | "extrato":
             print("\n================ EXTRATO ================")
-            print("Não foram realizadas movimentações." if not extrato else extrato)
+            print("Não foram realizadas movimentações.") if not dict_tempo_operacao else exibir_extrato(dict_tempo_operacao)
             print(f"\nSaldo: R$ {saldo:.2f}")
             print("==========================================")
         case "q" | "sair":
